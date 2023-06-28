@@ -12,6 +12,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum
+{
+	B_CHANNEL = 0,
+	G_CHANNEL = 1,
+	R_CHANNEL = 2
+
+} ChannelName;
+
 typedef struct
 {
 	uchar bValue;

@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include "../RemoteMonitorServer/transferData.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MonitorClient; }
 QT_END_NAMESPACE
@@ -39,8 +41,16 @@ class MonitorClient : public QMainWindow
 
     private slots:
     	void sendDataToServer();
+    	void createUserPackage();
 
 	private:
     	Ui::MonitorClient *ui;
+
+    	UserPackage userPackage;
+
+    	QString messageStr;
+    	QString userNameStr;
+    	QString userAgeStr;
+    	QString timeRecordStr;
 };
 #endif // MONITORCLIENT_H

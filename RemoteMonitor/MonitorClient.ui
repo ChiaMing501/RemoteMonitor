@@ -17,14 +17,27 @@
    <widget class="QPushButton" name="sendDataButton">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>340</y>
+      <x>480</x>
+      <y>360</y>
       <width>141</width>
       <height>61</height>
      </rect>
     </property>
     <property name="text">
      <string>Send</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="createDataButton">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>360</y>
+      <width>141</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Create</string>
     </property>
    </widget>
   </widget>
