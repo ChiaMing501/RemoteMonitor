@@ -42,6 +42,7 @@ void MonitorClient::createUserPackage()
 
 	qDebug() << "Image Size: " << imageWidth << " x " << imageHeight << "; Image Channels: " << imageChannels << endl;
 
+#ifdef RECORD_IMAGE
 	outputImage.create(imageHeight, imageWidth, CV_8UC3);
 
 	userPackage.imageBuffer = (UserChannel *)malloc(sizeof(UserChannel) * imageWidth * imageHeight);
@@ -68,19 +69,23 @@ void MonitorClient::createUserPackage()
 
 	imshow("GFriend Yuju", outputImage);
 	waitKey(0);
+#endif
 
 	dateTimeObj   = QDateTime::currentDateTime();
 	timeRecordStr = dateTimeObj.toString("yyyy-MM-dd hh:mm:ss");
 	timeDataArray = timeRecordStr.toLatin1();
 
-	strcpy(userPackage.userName, "Stanley Chang");
-	userPackage.userAge = 41;
+	strcpy(userPackage.userName, "Yuju1-z.jpg");
+	userPackage.userAge = 25;
 	strcpy(userPackage.timeRecord, timeDataArray.data());
+
+	QMessageBox::information(this, "Client Message", "User information is recorded.");
 
 } //end of function createUserPackage
 
 void MonitorClient::sendDataToServer()
 {
+#ifdef USER_INFO_DEBUG
 	qDebug() << "userPackage.timeRecord: " << userPackage.timeRecord << endl;
 
 	userNameStr = QString(QLatin1String(userPackage.userName));
@@ -88,6 +93,46 @@ void MonitorClient::sendDataToServer()
 	messageStr  = "User Name: " + userNameStr + "\nUser Age: " + userAgeStr + "\nTime Record: " + timeRecordStr;
 
 	QMessageBox::information(this, "Client User Information", messageStr);
+#endif
+
+	int clientSocketId = 0;
+	int reValue        = 0;
+	int dataLength     = 0;
+
+	struct sockaddr_in clientAddressObj;
+
+	clientSocketId = socket(AF_INET, SOCK_STREAM, 0);
+	if(clientSocketId < 0)
+	{
+		//fprintf(stderr, "Client [%d]: socket() failed !!\n", getpid());
+		qCritical() << "Client [" << QString::number(getpid()) << "]: socket() failed !!" << endl;
+
+		return;
+	}
+
+	clientAddressObj.sin_family      = AF_INET;
+	clientAddressObj.sin_port        = htons(SERVICE_PORT);
+	clientAddressObj.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+	dataLength = sizeof(clientAddressObj);
+
+	//connect() of Linux socket API and QT conflicked, so the use of ::connect() is needed for Linux socket API
+	reValue = ::connect(clientSocketId, (struct sockaddr *)&clientAddressObj, dataLength);
+	if(reValue == -1)
+	{
+		//fprintf(stderr, "Client [%d]: connect() failed !!\n", getpid());
+		qCritical() << "Client [" << QString::number(getpid()) << "]: connect() failed !!" << endl;
+
+		return;
+	}
+
+	write(clientSocketId, &userPackage, sizeof(UserPackage));
+	//printf("Client [%d] sent data to server.\n", getpid());
+	qDebug() << "Client [" << QString::number(getpid()) << "] sent user info to server.\n" << endl;
+
+	//close() of Linux socket API and QT conflicked, so the use of ::close() is needed for Linux socket API
+	::close(clientSocketId);
+	qDebug() << "Client [" << QString::number(getpid()) << "] closed the socket.\n" << endl;
 
 	if(userPackage.imageBuffer != NULL)
 	{

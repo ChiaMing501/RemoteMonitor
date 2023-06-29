@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SERVICE_PORT 9527
+
 typedef enum
 {
 	B_CHANNEL = 0,
