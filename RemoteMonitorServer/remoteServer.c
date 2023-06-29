@@ -7,6 +7,9 @@
 
 using namespace cv;
 
+void opencvProcessing(const UserPackage *uPackage);
+void mysqlProcessing(const UserPackage *uPackage);
+
 int main(int argc, char *argv[])
 {
 	UserPackage userPackage;
@@ -106,6 +109,9 @@ int main(int argc, char *argv[])
 
 						printf("Server [%d] got data from client (%d) ==> User Name: %s, User Age: %d, Time Record: %s\n",
 							getpid(), activeId, userPackage.userName, userPackage.userAge, userPackage.timeRecord);
+
+						//mysqlProcessing(&userPackage);
+						opencvProcessing(&userPackage);
 					}
 					else
 					{
@@ -118,114 +124,99 @@ int main(int argc, char *argv[])
 		}
 	}
 
-#ifdef USE_MYSQL
-	//MySQL Processing
+	if(userPackage.imageBuffer != NULL)
 	{
-		MYSQL mysqlObj;
-
-		const char *queryString = "SELECT * FROM staff";
-
-		/*char userName[]           = "Larson Chang";
-		int userAge               = 55;
-		char timeRecord[]         = "2022-11-23 19:22:12";
-		char sqlInsertString[256] = {0};
-
-		sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
-			userName, userAge, timeRecord);*/
-
-		char sqlInsertString[1024] = {0};
-
-		strcpy(userPackage.userName, "Leonel Messi");
-		userPackage.userAge = 35;
-		strcpy(userPackage.timeRecord, "2023-03-22 10:29:35");
-
-		sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
-			userPackage.userName, userPackage.userAge, userPackage.timeRecord);
-
-		mysqlServerInit(&mysqlObj);
-
-		displayAllRecords(&mysqlObj, queryString);
-
-		//addNewRecord(&mysqlObj, sqlInsertString);
-		//displayAllRecords(&mysqlObj, queryString);
-
-		mysqlServerClose(&mysqlObj);
-	}
-#endif
-
-#ifdef USE_OPENCV
-	//OpenCV Processing
-	{
-		Mat sourceImage, outputImage;
-		int imageWidth, imageHeight, imageChannel;
+		free(userPackage.imageBuffer);
 
 		userPackage.imageBuffer = NULL;
-
-		sourceImage = imread("/home/stanleychang/stanleychangFiles/images/Yuju1-z.jpg");
-		outputImage = sourceImage.clone();
-
-		imageWidth   = outputImage.cols;
-		imageHeight  = outputImage.rows;
-		imageChannel = outputImage.channels();
-
-		userPackage.imageBuffer = (UserChannel *)malloc(sizeof(UserChannel) * imageWidth * imageHeight);
-
-		printf("Image Size: %d x %d. Image Channel: %d\n", imageWidth, imageHeight, imageChannel);
-
-		//Copy source image to image buffer
-		for(int y = 0; y < imageHeight; y++)
-		{
-			for(int x = 0; x < imageWidth; x++)
-			{
-				userPackage.imageBuffer[(y * imageWidth) + x].bValue = sourceImage.at<Vec3b>(y, x)[0];
-				userPackage.imageBuffer[(y * imageWidth) + x].gValue = sourceImage.at<Vec3b>(y, x)[1];
-				userPackage.imageBuffer[(y * imageWidth) + x].rValue = sourceImage.at<Vec3b>(y, x)[2];
-			}
-		}
-
-		//Convert image buffer to gray
-		for(int y = 0; y < imageHeight; y++)
-		{
-			for(int x = 0; x < imageWidth; x++)
-			{
-				unsigned char averageValue, bValue, gValue, rValue;
-
-				bValue = userPackage.imageBuffer[(y * imageWidth) + x].bValue;
-				gValue = userPackage.imageBuffer[(y * imageWidth) + x].gValue;
-				rValue = userPackage.imageBuffer[(y * imageWidth) + x].rValue;
-
-				averageValue = (bValue + gValue + rValue) / 3;
-
-				userPackage.imageBuffer[(y * imageWidth) + x].bValue = averageValue;
-				userPackage.imageBuffer[(y * imageWidth) + x].gValue = averageValue;
-				userPackage.imageBuffer[(y * imageWidth) + x].rValue = averageValue;
-			}
-		}
-
-		//Assign image buffer to output image
-		for(int y = 0; y < imageHeight; y++)
-		{
-			for(int x = 0; x < imageWidth; x++)
-			{
-				outputImage.at<Vec3b>(y, x)[0] = userPackage.imageBuffer[(y * imageWidth) + x].bValue;
-				outputImage.at<Vec3b>(y, x)[1] = userPackage.imageBuffer[(y * imageWidth) + x].gValue;
-				outputImage.at<Vec3b>(y, x)[2] = userPackage.imageBuffer[(y * imageWidth) + x].rValue;
-			}
-		}
-
-		//imshow("GFriend Image (Original)", sourceImage);
-		imshow("GFriend Yuju Image (Gray)", outputImage);
-		waitKey(0);
-
-		if(userPackage.imageBuffer != NULL)
-		{
-			free(userPackage.imageBuffer);
-
-			userPackage.imageBuffer = NULL;
-		}
 	}
-#endif
 
 	exit(EXIT_SUCCESS);
 
 } //end of function main
+
+void opencvProcessing(const UserPackage *uPackage)
+{
+	Mat  userImage, processedImage;
+	int  imageWidth, imageHeight, imageChannel;
+	char imageDatabasePath[512];
+	char userNameStr[1024], userAgeStr[1024], timeRecordStr[1024];
+	char imageTitle[512];
+
+	memset(imageDatabasePath, 0, sizeof(imageDatabasePath));
+	strcpy(imageDatabasePath, "/home/stanleychang/stanleychangFiles/images/");
+	strcat(imageDatabasePath, uPackage->userName);
+	strcat(imageDatabasePath, ".jpg");
+	printf("Server [%d]: Image Database Path: %s\n", getpid(), imageDatabasePath);
+
+	userImage = imread(imageDatabasePath);
+
+	imageWidth   = userImage.cols;
+	imageHeight  = userImage.rows;
+	imageChannel = userImage.channels();
+	printf("Server [%d]: Image Size: %d x %d. Image Channel: %d\n", getpid(), imageWidth, imageHeight, imageChannel);
+
+	processedImage.create(imageHeight, imageWidth, CV_8UC3);
+
+	for(int y = 0; y < imageHeight; y++)
+	{
+		for(int x = 0; x < imageWidth; x++)
+		{
+			processedImage.at<Vec3b>(y, x)[B_CHANNEL] = 255 - userImage.at<Vec3b>(y, x)[B_CHANNEL];
+			processedImage.at<Vec3b>(y, x)[G_CHANNEL] = 255 - userImage.at<Vec3b>(y, x)[G_CHANNEL];
+			processedImage.at<Vec3b>(y, x)[R_CHANNEL] = 255 - userImage.at<Vec3b>(y, x)[R_CHANNEL];
+		}
+	}
+
+	sprintf(userNameStr, "User Name: %s", uPackage->userName);
+	putText(processedImage, userNameStr, Point(25, 50), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
+
+	sprintf(userAgeStr, "User Age: %d", uPackage->userAge);
+	putText(processedImage, userAgeStr, Point(25, 90), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
+
+	sprintf(timeRecordStr, "Time Record: %s", uPackage->timeRecord);
+	putText(processedImage, timeRecordStr, Point(25, 130), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
+
+	sprintf(imageTitle, "Server [%d]: User Information", getpid());
+	imshow(imageTitle, processedImage);
+	waitKey(0);
+
+} //end of function opencvProcessing
+
+void mysqlProcessing(const UserPackage *uPackage)
+{
+#ifdef TMP_CODE
+
+	MYSQL mysqlObj;
+
+	const char *queryString = "SELECT * FROM staff";
+
+	/*char userName[]           = "Larson Chang";
+	int userAge               = 55;
+	char timeRecord[]         = "2022-11-23 19:22:12";
+	char sqlInsertString[256] = {0};
+
+	sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
+		userName, userAge, timeRecord);*/
+
+	char sqlInsertString[1024] = {0};
+
+	strcpy(userPackage.userName, "Leonel Messi");
+	userPackage.userAge = 35;
+	strcpy(userPackage.timeRecord, "2023-03-22 10:29:35");
+
+	sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
+		userPackage.userName, userPackage.userAge, userPackage.timeRecord);
+
+	mysqlServerInit(&mysqlObj);
+
+	displayAllRecords(&mysqlObj, queryString);
+
+	//addNewRecord(&mysqlObj, sqlInsertString);
+	//displayAllRecords(&mysqlObj, queryString);
+
+	mysqlServerClose(&mysqlObj);
+
+#endif
+
+} //end of function mysqlProcessing
