@@ -32,10 +32,11 @@ void mysqlServerClose(MYSQL *mysqlObj)
 
 } //end of function mysqlServerClose
 
-void displayAllRecords(MYSQL *mysqlObjPtr, const char *userSqlQueryString)
+int displayAllRecords(MYSQL *mysqlObjPtr, const char *userSqlQueryString)
 {
 	int reValueNum;
 	int fieldNum;
+	int maxId;
 
 	MYSQL_RES   *mysqlResObj;
 	MYSQL_FIELD *mysqlFieldObj;
@@ -81,11 +82,15 @@ void displayAllRecords(MYSQL *mysqlObjPtr, const char *userSqlQueryString)
 			printf("%s  ", mysqlRowObj[i]);
 		}
 		printf("\n");
+
+		maxId = atoi(mysqlRowObj[0]);
 	}
 
 	printf("================================================\n");
 
 	printf("\n\n");
+
+	return maxId;
 
 } //end of function displayAllRecords
 

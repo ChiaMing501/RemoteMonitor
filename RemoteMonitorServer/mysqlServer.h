@@ -8,7 +8,7 @@
 
 void mysqlServerInit(MYSQL *mysqlObj);
 void mysqlServerClose(MYSQL *mysqlObj);
-void displayAllRecords(MYSQL *mysqlObjPtr, const char *userSqlQueryString);
+int  displayAllRecords(MYSQL *mysqlObjPtr, const char *userSqlQueryString);
 void addNewRecord(MYSQL *mysqlObjPtr, const char *userSqlQueryString);
 
 #endif

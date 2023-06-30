@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 						printf("Server [%d] got data from client (%d) ==> User Name: %s, User Age: %d, Time Record: %s\n",
 							getpid(), activeId, userPackage.userName, userPackage.userAge, userPackage.timeRecord);
 
-						//mysqlProcessing(&userPackage);
+						mysqlProcessing(&userPackage);
 						opencvProcessing(&userPackage);
 					}
 					else
@@ -185,38 +185,24 @@ void opencvProcessing(const UserPackage *uPackage)
 
 void mysqlProcessing(const UserPackage *uPackage)
 {
-#ifdef TMP_CODE
-
 	MYSQL mysqlObj;
 
-	const char *queryString = "SELECT * FROM staff";
-
-	/*char userName[]           = "Larson Chang";
-	int userAge               = 55;
-	char timeRecord[]         = "2022-11-23 19:22:12";
-	char sqlInsertString[256] = {0};
-
-	sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
-		userName, userAge, timeRecord);*/
-
+	const char *queryString    = "SELECT * FROM staff";
 	char sqlInsertString[1024] = {0};
-
-	strcpy(userPackage.userName, "Leonel Messi");
-	userPackage.userAge = 35;
-	strcpy(userPackage.timeRecord, "2023-03-22 10:29:35");
-
-	sprintf(sqlInsertString, "INSERT INTO staff(userName, userAge, timeRecord) VALUES('%s', %d, '%s')",
-		userPackage.userName, userPackage.userAge, userPackage.timeRecord);
+	int maxUserNumber          = 0;
 
 	mysqlServerInit(&mysqlObj);
 
+	maxUserNumber = displayAllRecords(&mysqlObj, queryString);
+	//printf("Max User Number: %d\n", maxUserNumber);
+
+	sprintf(sqlInsertString, "INSERT INTO staff(userNumber, userName, userAge, timeRecord) VALUES(%d, '%s', %d, '%s')",
+		maxUserNumber + 1, uPackage->userName, uPackage->userAge, uPackage->timeRecord);
+
+	printf("#######################################################################\n");
+	addNewRecord(&mysqlObj, sqlInsertString);
 	displayAllRecords(&mysqlObj, queryString);
 
-	//addNewRecord(&mysqlObj, sqlInsertString);
-	//displayAllRecords(&mysqlObj, queryString);
-
 	mysqlServerClose(&mysqlObj);
-
-#endif
 
 } //end of function mysqlProcessing
