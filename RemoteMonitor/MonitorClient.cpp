@@ -7,6 +7,7 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 
     connect(ui->sendDataButton, SIGNAL(clicked()), this, SLOT(sendDataToServer()));
     connect(ui->createDataButton, SIGNAL(clicked()), this, SLOT(createUserPackage()));
+    connect(this, SIGNAL(sendTimeSignal(QString)), this, SLOT(setTimeStr(QString)));
 
     ui->sendDataButton->setVisible(true);
 
@@ -18,6 +19,11 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 	userAgeStr    = "";
 	timeRecordStr = "";
 
+	ui->timeLineEdit->setReadOnly(true);
+
+	pthread_create(&timeThreadId, NULL, showCurrentTime, (void *)this);
+	pthread_detach(timeThreadId);
+
 } //end of constructor
 
 MonitorClient::~MonitorClient()
@@ -25,6 +31,33 @@ MonitorClient::~MonitorClient()
     delete ui;
 
 } //end of destructor
+
+void MonitorClient::setTimeStr(QString timeStr)
+{
+	ui->timeLineEdit->setText(timeStr);
+
+} //end of function setTimeStr
+
+void *MonitorClient::showCurrentTime(void *argument)
+{
+	QDateTime dateTimeObj;
+	QString   currentTimeStr;
+
+	MonitorClient *monitorClientObj = static_cast<MonitorClient *>(argument);
+
+	while(1)
+	{
+		dateTimeObj    = QDateTime::currentDateTime();
+		currentTimeStr = dateTimeObj.toString("yyyy-MM-dd  hh:mm:ss");
+
+		monitorClientObj->sendTimeSignal(currentTimeStr);
+
+		sleep(1);
+	}
+
+	pthread_exit(NULL);
+
+} //end of function showCurrentTime
 
 void MonitorClient::createUserPackage()
 {

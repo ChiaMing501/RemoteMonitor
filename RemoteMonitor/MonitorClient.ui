@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>360</y>
+      <y>430</y>
       <width>141</width>
       <height>61</height>
      </rect>
@@ -31,13 +31,29 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>360</y>
+      <y>430</y>
       <width>141</width>
       <height>61</height>
      </rect>
     </property>
     <property name="text">
      <string>Create</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="timeLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>360</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
     </property>
    </widget>
   </widget>

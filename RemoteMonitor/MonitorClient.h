@@ -39,18 +39,25 @@ class MonitorClient : public QMainWindow
     	MonitorClient(QWidget *parent = nullptr);
     	~MonitorClient();
 
+    signals:
+    	void sendTimeSignal(QString timeStr);
+
     private slots:
     	void sendDataToServer();
     	void createUserPackage();
+    	void setTimeStr(QString timeStr);
 
 	private:
     	Ui::MonitorClient *ui;
 
     	UserPackage userPackage;
+    	pthread_t   timeThreadId;
 
     	QString messageStr;
     	QString userNameStr;
     	QString userAgeStr;
     	QString timeRecordStr;
+
+    	static void *showCurrentTime(void *argument);
 };
 #endif // MONITORCLIENT_H
