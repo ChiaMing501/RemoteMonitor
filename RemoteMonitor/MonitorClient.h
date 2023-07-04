@@ -24,6 +24,7 @@
 #include <pthread.h>
 
 #include "../RemoteMonitorServer/transferData.h"
+#include "ImageProcessTool.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MonitorClient; }

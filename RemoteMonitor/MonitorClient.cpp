@@ -61,6 +61,18 @@ void *MonitorClient::showCurrentTime(void *argument)
 
 void MonitorClient::createUserPackage()
 {
+	ImageProcessTool imageProcessTool;
+	char             qtUserMessage[256];
+	QString          infoStr;
+
+	memset(qtUserMessage, 0, sizeof(qtUserMessage));
+
+	imageProcessTool.getUserMessage(qtUserMessage, sizeof(qtUserMessage));
+	infoStr = QString(qtUserMessage);
+
+	QMessageBox::information(this, "QT Library Test", infoStr);
+
+#ifdef TMP_MARK
 	QDateTime  dateTimeObj;
 	QByteArray timeDataArray;
 
@@ -74,6 +86,7 @@ void MonitorClient::createUserPackage()
 
 	qDebug() << "Client [" << QString::number(getpid()) << "] catched user information: User Name: " << userPackage.userName <<
 		"; User Age: " << QString::number(userPackage.userAge) << "; Time Record: " << userPackage.timeRecord << endl;
+#endif
 
 } //end of function createUserPackage
 

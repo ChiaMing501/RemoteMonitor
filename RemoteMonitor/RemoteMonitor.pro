@@ -29,9 +29,11 @@ FORMS += \
 
 INCLUDEPATH += /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/include \
                /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/include/opencv4 \
-               /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/include/opencv4/opencv2
+               /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/include/opencv4/opencv2 \
+               /home/stanleychang/stanleychangFiles/qtProjects/RemoteMonitorProject/myOpencvProgram/include
 
-LIBS += /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/lib/libopencv*.so
+LIBS += /home/stanleychang/stanleychangFiles/opencvProgram/opencv-4.7.0/build/installed/lib/libopencv*.so \
+        /home/stanleychang/stanleychangFiles/qtProjects/RemoteMonitorProject/myOpencvProgram/lib/*.so
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
