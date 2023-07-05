@@ -61,6 +61,19 @@ void *MonitorClient::showCurrentTime(void *argument)
 
 void MonitorClient::createUserPackage()
 {
+	String directoryPath = "/home/stanleychang/stanleychangFiles/images/";
+	Mat originalImage    = imread(directoryPath + "Yuju4-z.jpg");
+	Mat outputImage;
+	int faceWidth, faceHeight;
+
+	skinCollector(originalImage, outputImage);
+	faceDetection(originalImage, outputImage, &faceWidth, &faceHeight);
+
+	imshow("Skin Range", outputImage);
+	imshow("Face Detection Result", originalImage);
+	waitKey(0);
+
+#ifdef TMP_MARK
 	ImageProcessTool imageProcessTool;
 	char             qtUserMessage[256];
 	QString          infoStr;
@@ -71,6 +84,7 @@ void MonitorClient::createUserPackage()
 	infoStr = QString(qtUserMessage);
 
 	QMessageBox::information(this, "QT Library Test", infoStr);
+#endif
 
 #ifdef TMP_MARK
 	QDateTime  dateTimeObj;
