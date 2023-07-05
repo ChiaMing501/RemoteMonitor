@@ -48,6 +48,9 @@ class MonitorClient : public QMainWindow
     	void sendDataToServer();
     	void createUserPackage();
     	void setTimeStr(QString timeStr);
+    	void displayLiveView();
+    	void stopLiveView();
+    	void nextFrame();
 
 	private:
     	Ui::MonitorClient *ui;
@@ -59,6 +62,16 @@ class MonitorClient : public QMainWindow
     	QString userNameStr;
     	QString userAgeStr;
     	QString timeRecordStr;
+
+    	VideoCapture *capturePtr;
+		Mat          *framePtr;
+		QTimer       *timerPtr;
+		QImage       qImage;
+		QPixmap      qPixmap;
+
+		QImage cvMat2QImage(const cv::Mat &mat);
+		void toGrayImage(const cv::Mat &sourceImage, cv::Mat &outputImage, const int imageHeight, const int imageWidth);
+		void toNegativeImage(const cv::Mat &sourceImage, cv::Mat &outputImage, const int imageHeight, const int imageWidth);
 
     	static void *showCurrentTime(void *argument);
 };
