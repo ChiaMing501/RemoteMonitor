@@ -18,3 +18,7 @@
 
 # Build directories
 /build-RemoteMonitor-Desktop_Qt_5_14_2_GCC_64bit-Debug/
+
+#Created files by Remote Monitor Server
+remoteServer
+UserImage.data
