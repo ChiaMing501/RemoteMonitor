@@ -22,6 +22,7 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 
     ui->sendDataButton->setVisible(false);
     ui->createDataButton->setVisible(false);
+    ui->faceDetectionCheckBox->setChecked(true);
 
     memset(&userPackage, 0, sizeof(UserPackage));
 	userPackage.imageBuffer = NULL;
@@ -132,6 +133,7 @@ void MonitorClient::nextFrame()
     *capturePtr >> *framePtr;
 
     //Face Detection
+    if(ui->faceDetectionCheckBox->isChecked())
     {
     	Mat outputImage;
     	int faceWidth, faceHeight;
@@ -264,7 +266,7 @@ void *MonitorClient::showCurrentTime(void *argument)
 	while(1)
 	{
 		dateTimeObj    = QDateTime::currentDateTime();
-		currentTimeStr = dateTimeObj.toString("yyyy-MM-dd  hh:mm:ss");
+		currentTimeStr = dateTimeObj.toString("yyyy-MM-dd   hh:mm:ss");
 
 		monitorClientObj->sendTimeSignal(currentTimeStr);
 

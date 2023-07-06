@@ -17,9 +17,9 @@
    <widget class="QPushButton" name="sendDataButton">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>500</y>
-      <width>141</width>
+      <x>10</x>
+      <y>90</y>
+      <width>31</width>
       <height>61</height>
      </rect>
     </property>
@@ -30,9 +30,9 @@
    <widget class="QPushButton" name="createDataButton">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>500</y>
-      <width>141</width>
+      <x>10</x>
+      <y>20</y>
+      <width>31</width>
       <height>61</height>
      </rect>
     </property>
@@ -45,14 +45,13 @@
      <rect>
       <x>50</x>
       <y>510</y>
-      <width>151</width>
+      <width>201</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <weight>50</weight>
-      <bold>false</bold>
+      <pointsize>15</pointsize>
      </font>
     </property>
    </widget>
@@ -81,6 +80,11 @@
       <height>61</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>Play</string>
     </property>
@@ -94,8 +98,31 @@
       <height>61</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="faceDetectionCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>510</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Face Detection</string>
     </property>
    </widget>
   </widget>
