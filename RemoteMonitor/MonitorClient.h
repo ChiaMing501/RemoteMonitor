@@ -33,6 +33,15 @@ QT_END_NAMESPACE
 
 using namespace cv;
 
+typedef struct
+{
+	bool isDetected;
+	bool isTransmitted;
+
+	unsigned int detectedCount;
+
+} liveViewAction;
+
 class MonitorClient : public QMainWindow
 {
     Q_OBJECT
@@ -55,8 +64,9 @@ class MonitorClient : public QMainWindow
 	private:
     	Ui::MonitorClient *ui;
 
-    	UserPackage userPackage;
-    	pthread_t   timeThreadId;
+    	UserPackage    userPackage;
+    	pthread_t      timeThreadId;
+    	liveViewAction liveViewActionObj;
 
     	QString messageStr;
     	QString userNameStr;

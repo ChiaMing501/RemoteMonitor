@@ -172,13 +172,13 @@ void opencvProcessing(const UserPackage *uPackage)
 	}
 
 	sprintf(userNameStr, "User Name: %s", uPackage->userName);
-	putText(processedImage, userNameStr, Point(25, 50), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 0, 0), 2, 8);
+	putText(processedImage, userNameStr, Point(25, 50), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
 
 	sprintf(userAgeStr, "User Age: %d", uPackage->userAge);
-	putText(processedImage, userAgeStr, Point(25, 90), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 0, 0), 2, 8);
+	putText(processedImage, userAgeStr, Point(25, 90), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
 
 	sprintf(timeRecordStr, "Time Record: %s", uPackage->timeRecord);
-	putText(processedImage, timeRecordStr, Point(25, 130), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(255, 0, 0), 2, 8);
+	putText(processedImage, timeRecordStr, Point(25, 130), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255), 2, 8);
 
 	sprintf(imageTitle, "Server [%d]: Real Time Matched User Image", getpid());
 	imshow(imageTitle, processedImage);

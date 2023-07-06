@@ -32,6 +32,10 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 	userAgeStr    = "";
 	timeRecordStr = "";
 
+	liveViewActionObj.isDetected    = false;
+	liveViewActionObj.isTransmitted = false;
+	liveViewActionObj.detectedCount = 0;
+
 	ui->timeLineEdit->setReadOnly(true);
 
 	pthread_create(&timeThreadId, NULL, showCurrentTime, (void *)this);
@@ -133,13 +137,45 @@ void MonitorClient::nextFrame()
     *capturePtr >> *framePtr;
 
     //Face Detection
-    if(ui->faceDetectionCheckBox->isChecked())
+    if(ui->faceDetectionCheckBox->isChecked() == true)
     {
     	Mat outputImage;
     	int faceWidth, faceHeight;
 
     	skinCollector(*framePtr, outputImage);
     	faceDetection(*framePtr, outputImage, &faceWidth, &faceHeight);
+
+    	//qDebug() << "Face is detected. ( rect size: " << faceWidth << "x" << faceHeight << " ) " << endl;
+
+    	if((faceWidth >= 45) && (faceHeight >= 50))
+    	{
+    		liveViewActionObj.detectedCount++;
+
+    		if((liveViewActionObj.isDetected == false) && (liveViewActionObj.detectedCount >= 90))
+    		{
+    			liveViewActionObj.isDetected    = true;
+    			liveViewActionObj.isTransmitted = true;
+    			liveViewActionObj.detectedCount = 0;
+
+    			qDebug() << "Face is detected. ( rect size: " << faceWidth << "x" << faceHeight << " ) " << endl;
+    		}
+    	}
+    	else
+    	{
+    		liveViewActionObj.isDetected    = false;
+    		liveViewActionObj.detectedCount = 0;
+    	}
+    }
+
+    //User Data Transmission by Socket
+    if(liveViewActionObj.isTransmitted == true)
+    {
+    	qDebug() << "Transmit data to Server." << endl;
+
+    	liveViewActionObj.isTransmitted = false;
+
+    	createUserPackage();
+    	sendDataToServer();
     }
 
     if(capturePtr->isOpened())
@@ -279,32 +315,6 @@ void *MonitorClient::showCurrentTime(void *argument)
 
 void MonitorClient::createUserPackage()
 {
-	String directoryPath = "/home/stanleychang/stanleychangFiles/images/";
-	Mat originalImage    = imread(directoryPath + "Yuju4-z.jpg");
-	Mat outputImage;
-	int faceWidth, faceHeight;
-
-	skinCollector(originalImage, outputImage);
-	faceDetection(originalImage, outputImage, &faceWidth, &faceHeight);
-
-	imshow("Skin Range", outputImage);
-	imshow("Face Detection Result", originalImage);
-	waitKey(0);
-
-#ifdef TMP_MARK
-	ImageProcessTool imageProcessTool;
-	char             qtUserMessage[256];
-	QString          infoStr;
-
-	memset(qtUserMessage, 0, sizeof(qtUserMessage));
-
-	imageProcessTool.getUserMessage(qtUserMessage, sizeof(qtUserMessage));
-	infoStr = QString(qtUserMessage);
-
-	QMessageBox::information(this, "QT Library Test", infoStr);
-#endif
-
-#ifdef TMP_MARK
 	QDateTime  dateTimeObj;
 	QByteArray timeDataArray;
 
@@ -312,13 +322,12 @@ void MonitorClient::createUserPackage()
 	timeRecordStr = dateTimeObj.toString("yyyy-MM-dd hh:mm:ss");
 	timeDataArray = timeRecordStr.toLatin1();
 
-	strcpy(userPackage.userName, "Yuju-Cheng");
-	userPackage.userAge = 27;
+	strcpy(userPackage.userName, "Stanley-Chang");
+	userPackage.userAge = 41;
 	strcpy(userPackage.timeRecord, timeDataArray.data());
 
 	qDebug() << "Client [" << QString::number(getpid()) << "] catched user information: User Name: " << userPackage.userName <<
 		"; User Age: " << QString::number(userPackage.userAge) << "; Time Record: " << userPackage.timeRecord << endl;
-#endif
 
 } //end of function createUserPackage
 
