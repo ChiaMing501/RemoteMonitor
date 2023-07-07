@@ -38,6 +38,7 @@ typedef struct
 	bool isDetected;
 	bool isTransmitted;
 	bool isTextShowed;
+	bool isFaceRectShowed;
 
 	unsigned int detectedCount;
 
@@ -68,6 +69,7 @@ class MonitorClient : public QMainWindow
     	UserPackage    userPackage;
     	pthread_t      timeThreadId;
     	LiveViewAction liveViewActionObj;
+    	FaceRect       faceRectObj;
 
     	QString messageStr;
     	QString userNameStr;

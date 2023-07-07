@@ -29,9 +29,19 @@ typedef enum
 
 } ColorChannel;
 
+typedef struct
+{
+	int xStart;
+	int xEnd;
+	int yStart;
+	int yEnd;
+
+} FaceRect;
+
 void skinCollector(const Mat &sourceImage, Mat &processedImage);
 void dilationProcess(Mat &outputImage, int times);
 void erosionProcess(Mat &outputImage, int times);
 void faceDetection(Mat &originalImage, const Mat &skinRangeImage, int *userFaceWidth, int *userFaceHeight);
+void faceDetection2(Mat &originalImage, const Mat &skinRangeImage, int *userFaceWidth, int *userFaceHeight, FaceRect &faceRectObj);
 
 #endif

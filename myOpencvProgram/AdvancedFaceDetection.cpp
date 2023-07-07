@@ -323,3 +323,129 @@ void faceDetection(Mat &originalImage, const Mat &skinRangeImage, int *userFaceW
 	}
 
 } //end of function faceDetection
+
+void faceDetection2(Mat &originalImage, const Mat &skinRangeImage, int *userFaceWidth, int *userFaceHeight, FaceRect &faceRectObj)
+{
+	int width       = originalImage.cols;
+	int height      = originalImage.rows;
+	int channel     = originalImage.channels();
+	int *yHistogram = NULL;
+	int *xHistogram = NULL;
+	int xStart      = 0;
+	int xEnd        = 0;
+	int yStart      = 0;
+	int yEnd        = 0;
+
+	if((width != skinRangeImage.cols) && (height != skinRangeImage.rows) && (channel != skinRangeImage.channels()))
+	{
+		cout << "Image size does not match !!" << endl;
+
+		return;
+	}
+
+	yHistogram = new int[height];
+	xHistogram = new int[width];
+
+	memset(yHistogram, 0, sizeof(int) * height);
+	memset(xHistogram, 0, sizeof(int) * width);
+
+	//Calculate the histogram of Y
+	for(int y = 0; y < height; y++)
+	{
+		for(int x = 0; x < width; x++)
+		{
+			//Refer to only one channel because the values of three channels are the same (0 or 255)
+			uchar targetPixel = skinRangeImage.at<Vec3b>(y, x)[B_CHL];
+
+			if(targetPixel == 255)
+			{
+				yHistogram[y]++;
+			}
+		}
+	}
+
+	//Calculate the histogram of X
+	for(int x = 0; x < width; x++)
+	{
+		for(int y = 0; y < height; y++)
+		{
+			//Refer to only one channel because the values of three channels are the same (0 or 255)
+			uchar targetPixel = skinRangeImage.at<Vec3b>(y, x)[B_CHL];
+
+			if(targetPixel == 255)
+			{
+				xHistogram[x]++;
+			}
+		}
+	}
+
+	//Find X start
+	for(int i = 0; i < width; i++)
+	{
+		if(xHistogram[i] >= X_THRESHOLD)
+		{
+			xStart = i;
+
+			break;
+		}
+	}
+
+	//Find X end
+	for(int i = width - 1; i >= 0; i--)
+	{
+		if(xHistogram[i] >= X_THRESHOLD)
+		{
+			xEnd = i;
+
+			break;
+		}
+	}
+
+	//Find Y start
+	for(int i = 0; i < height; i++)
+	{
+		if(yHistogram[i] >= Y_THRESHOLD)
+		{
+			yStart = i;
+
+			break;
+		}
+	}
+
+	//Find Y end
+	for(int i = height - 1; i >= 0; i--)
+	{
+		if(yHistogram[i] >= Y_THRESHOLD)
+		{
+			yEnd = i;
+
+			break;
+		}
+	}
+
+	Rect rect(xStart, yStart, xEnd - xStart, yEnd - yStart);
+	rectangle(originalImage, rect, Scalar(0, 0, 255), 2, LINE_8, 0);
+
+	*userFaceWidth  = xEnd - xStart;
+	*userFaceHeight = yEnd - yStart;
+
+	faceRectObj.xStart = xStart;
+	faceRectObj.xEnd   = xEnd;
+	faceRectObj.yStart = yStart;
+	faceRectObj.yEnd   = yEnd;
+
+	if(yHistogram != NULL)
+	{
+		delete [] yHistogram;
+
+		yHistogram = NULL;
+	}
+
+	if(xHistogram != NULL)
+	{
+		delete [] xHistogram;
+
+		xHistogram = NULL;
+	}
+
+} //end of function faceDetection2

@@ -32,10 +32,16 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 	userAgeStr    = "";
 	timeRecordStr = "";
 
-	liveViewActionObj.isDetected    = false;
-	liveViewActionObj.isTransmitted = false;
-	liveViewActionObj.isTextShowed  = false;
-	liveViewActionObj.detectedCount = 0;
+	liveViewActionObj.isDetected       = false;
+	liveViewActionObj.isTransmitted    = false;
+	liveViewActionObj.isTextShowed     = false;
+	liveViewActionObj.isFaceRectShowed = false;
+	liveViewActionObj.detectedCount    = 0;
+
+	faceRectObj.xStart = 0;
+	faceRectObj.xEnd   = 0;
+	faceRectObj.yStart = 0;
+	faceRectObj.yEnd   = 0;
 
 	ui->timeLineEdit->setReadOnly(true);
 
@@ -143,8 +149,12 @@ void MonitorClient::nextFrame()
     	Mat outputImage;
     	int faceWidth, faceHeight;
 
+    	QString coordinateStr;
+    	char    strBuffer[128];
+
     	skinCollector(*framePtr, outputImage);
-    	faceDetection(*framePtr, outputImage, &faceWidth, &faceHeight);
+    	faceDetection2(*framePtr, outputImage, &faceWidth, &faceHeight, faceRectObj);
+    	//faceDetection(*framePtr, outputImage, &faceWidth, &faceHeight);
 
     	//qDebug() << "Face is detected. ( rect size: " << faceWidth << "x" << faceHeight << " ) " << endl;
 
@@ -154,12 +164,19 @@ void MonitorClient::nextFrame()
 
     		if((liveViewActionObj.isDetected == false) && (liveViewActionObj.detectedCount >= 90))
     		{
-    			liveViewActionObj.isDetected    = true;
-    			liveViewActionObj.isTransmitted = true;
-    			liveViewActionObj.isTextShowed  = true;
-    			liveViewActionObj.detectedCount = 0;
+    			liveViewActionObj.isDetected       = true;
+    			liveViewActionObj.isTransmitted    = true;
+    			liveViewActionObj.isTextShowed     = true;
+    			liveViewActionObj.isFaceRectShowed = true;
+    			liveViewActionObj.detectedCount    = 0;
 
     			qDebug() << "Face is detected. ( rect size: " << faceWidth << "x" << faceHeight << " ) " << endl;
+
+    			sprintf(strBuffer, "Face Rect Coordinate: xStart = %d, xEnd = %d, yStart = %d, yEnd = %d",
+    				faceRectObj.xStart, faceRectObj.xEnd, faceRectObj.yStart, faceRectObj.yEnd);
+
+    			coordinateStr = QString(strBuffer);
+    			qDebug() << coordinateStr << endl;
     		}
     	}
     	else
@@ -179,6 +196,80 @@ void MonitorClient::nextFrame()
 
     	createUserPackage();
     	sendDataToServer();
+    }
+
+    //Show User Face Rect Static Image
+    if(liveViewActionObj.isFaceRectShowed == true)
+    {
+    	qDebug() << "Show detected user face." << endl;
+
+    	liveViewActionObj.isFaceRectShowed = false;
+
+    	Mat faceRectImage;
+    	int rectWidth, rectHeight;
+
+    	QImage  faceRectQImage;
+    	QPixmap faceRectQPixmap;
+
+    	QString debugStr;
+    	char    debugBuffer[128];
+
+    	UserChannel *cutImage   = NULL;
+    	unsigned int indexCount = 0;
+
+    	rectWidth  = faceRectObj.xEnd - faceRectObj.xStart;
+    	rectHeight = faceRectObj.yEnd - faceRectObj.yStart;
+
+    	faceRectImage.create(rectHeight, rectWidth, CV_8UC3);
+
+    	sprintf(debugBuffer, "width: %d, height: %d, xStart: %d, xEnd: %d, yStart: %d, yEnd: %d", rectWidth, rectHeight,
+    			faceRectObj.xStart, faceRectObj.xEnd, faceRectObj.yStart, faceRectObj.yEnd);
+    	debugStr = QString(debugBuffer);
+    	//qDebug() << debugStr << endl;
+
+    	cutImage = (UserChannel *)malloc(sizeof(UserChannel) * rectWidth * rectHeight);
+
+    	for(int y = faceRectObj.yStart; y < faceRectObj.yEnd; y++)
+		{
+			for(int x = faceRectObj.xStart; x < faceRectObj.xEnd; x++)
+			{
+				cutImage[indexCount].bValue = (*framePtr).at<Vec3b>(y, x)[B_CHANNEL];
+				cutImage[indexCount].gValue = (*framePtr).at<Vec3b>(y, x)[G_CHANNEL];
+				cutImage[indexCount].rValue = (*framePtr).at<Vec3b>(y, x)[R_CHANNEL];
+
+				indexCount++;
+			}
+		}
+
+    	indexCount = 0;
+
+    	for(int y = 0; y < rectHeight; y++)
+    	{
+    		for(int x = 0; x < rectWidth; x++)
+    		{
+    			faceRectImage.at<Vec3b>(y, x)[B_CHANNEL] = cutImage[indexCount].bValue;
+				faceRectImage.at<Vec3b>(y, x)[G_CHANNEL] = cutImage[indexCount].gValue;
+				faceRectImage.at<Vec3b>(y, x)[R_CHANNEL] = cutImage[indexCount].rValue;
+
+				indexCount++;
+    		}
+    	}
+
+    	/*Rect rectObj(faceRectObj.xStart, faceRectObj.yStart, rectWidth, rectHeight);
+    	faceRectImage = Mat((*framePtr), rectObj);*/
+
+    	faceRectQImage  = cvMat2QImage(faceRectImage);
+    	faceRectQPixmap = QPixmap::fromImage(faceRectQImage);
+    	faceRectQPixmap = faceRectQPixmap.scaled(ui->faceRectLabel->width(), ui->faceRectLabel->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    	ui->faceRectLabel->setPixmap(faceRectQPixmap);
+
+    	if(cutImage != NULL)
+    	{
+    		free(cutImage);
+
+    		cutImage = NULL;
+    	}
     }
 
     //Show User Data on Live View
