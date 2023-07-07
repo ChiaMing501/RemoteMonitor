@@ -34,6 +34,7 @@ MonitorClient::MonitorClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::
 
 	liveViewActionObj.isDetected    = false;
 	liveViewActionObj.isTransmitted = false;
+	liveViewActionObj.isTextShowed  = false;
 	liveViewActionObj.detectedCount = 0;
 
 	ui->timeLineEdit->setReadOnly(true);
@@ -155,6 +156,7 @@ void MonitorClient::nextFrame()
     		{
     			liveViewActionObj.isDetected    = true;
     			liveViewActionObj.isTransmitted = true;
+    			liveViewActionObj.isTextShowed  = true;
     			liveViewActionObj.detectedCount = 0;
 
     			qDebug() << "Face is detected. ( rect size: " << faceWidth << "x" << faceHeight << " ) " << endl;
@@ -163,6 +165,7 @@ void MonitorClient::nextFrame()
     	else
     	{
     		liveViewActionObj.isDetected    = false;
+    		liveViewActionObj.isTextShowed  = false;
     		liveViewActionObj.detectedCount = 0;
     	}
     }
@@ -176,6 +179,29 @@ void MonitorClient::nextFrame()
 
     	createUserPackage();
     	sendDataToServer();
+    }
+
+    //Show User Data on Live View
+    if(liveViewActionObj.isTextShowed == true)
+    {
+    	char userNameStr[512];
+    	char userAgeStr[512];
+    	char timeRecordStr[512];
+
+    	sprintf(userNameStr, "User Name: %s", userPackage.userName);
+    	putText(*framePtr, userNameStr, Point(3, 10), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(0, 0, 255), 1, 8);
+
+    	sprintf(userAgeStr, "User Age: %d", userPackage.userAge);
+    	putText(*framePtr, userAgeStr, Point(3, 30), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(0, 0, 255), 1, 8);
+
+    	sprintf(timeRecordStr, "Time Record: %s", userPackage.timeRecord);
+    	putText(*framePtr, timeRecordStr, Point(3, 50), FONT_HERSHEY_SIMPLEX, 0.3, Scalar(0, 0, 255), 1, 8);
+
+    	//Test
+    	/*if(liveViewActionObj.detectedCount >= 110)
+    	{
+    		stopLiveView();
+    	}*/
     }
 
     if(capturePtr->isOpened())

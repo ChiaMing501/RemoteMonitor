@@ -37,10 +37,11 @@ typedef struct
 {
 	bool isDetected;
 	bool isTransmitted;
+	bool isTextShowed;
 
 	unsigned int detectedCount;
 
-} liveViewAction;
+} LiveViewAction;
 
 class MonitorClient : public QMainWindow
 {
@@ -66,7 +67,7 @@ class MonitorClient : public QMainWindow
 
     	UserPackage    userPackage;
     	pthread_t      timeThreadId;
-    	liveViewAction liveViewActionObj;
+    	LiveViewAction liveViewActionObj;
 
     	QString messageStr;
     	QString userNameStr;
